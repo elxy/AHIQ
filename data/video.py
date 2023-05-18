@@ -108,4 +108,4 @@ class VideoPredict(Dataset):
         return ref, dis
 
     def __len__(self):
-        return self.frame_count
+        return self.frame_count // self.stride_t

@@ -69,12 +69,12 @@ def predict_model(deform_net, resnet50, vit, regressor, opt, device, dataloader)
                 vit_ref = vit_ref.transpose(1, 2).view(B, C, H, W)
                 vit_dis = vit_dis.transpose(1, 2).view(B, C, H, W)
 
-                _ = resnet50(dis)
+                _ = resnet50(d_img)
                 cnn_dis = get_resnet_feature(save_output)
                 save_output.outputs.clear()
                 cnn_dis = deform_net(cnn_dis, vit_ref)
 
-                _ = resnet50(ref)
+                _ = resnet50(r_img)
                 cnn_ref = get_resnet_feature(save_output)
                 save_output.outputs.clear()
                 cnn_ref = deform_net(cnn_ref, vit_ref)
@@ -82,11 +82,11 @@ def predict_model(deform_net, resnet50, vit, regressor, opt, device, dataloader)
                 pred += regressor(vit_dis, vit_ref, cnn_dis, cnn_ref)
 
             pred /= opt.n_ensemble
-            for i in range(opt.batch_size):
-                pred = float(pred.squeeze()[i])
-                epoch_preds.append(pred)
-                pbar.set_postfix(MOS=pred)
+            epoch_preds.append(pred)
+            pbar.set_postfix(MOS=pred)
 
+        epoch_preds = torch.cat(epoch_preds).flatten().data.cpu().numpy()
+        epoch_preds = epoch_preds.tolist()
         return epoch_preds
 
 
